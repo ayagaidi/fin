@@ -66,7 +66,8 @@
                         <td>{{ number_format($file->total_liabilities, 3) }}</td>
                         <td>{{ $file->created_at->format('Y-m-d H:i') }}</td>
                         <td>
-                            <a href="{{ route('admin.view', $file) }}">عرض</a>
+                            <a href="{{ route('admin.accounts', ['file_id' => $file->id]) }}">الحسابات</a>
+                            <a href="{{ route('admin.view', $file) }}" style="margin-right: 0.5rem;">عرض الملف</a>
                         </td>
                     </tr>
                 @empty

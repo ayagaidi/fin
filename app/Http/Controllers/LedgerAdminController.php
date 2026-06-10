@@ -58,7 +58,7 @@ class LedgerAdminController extends Controller
                 'total_liabilities' => $totals['liabilities'],
             ]);
 
-            $reconciliation = $this->parseAndReconcile($path, $reportDate);
+            $reconciliation = $this->parseAndReconcile($path, $reportDate, $ledgerFile);
             $reconciliation['file'] = $ledgerFile;
 
             return view('admin.upload', $reconciliation);
@@ -75,6 +75,38 @@ class LedgerAdminController extends Controller
         }
         $content = file_get_contents($path);
         return view('admin.view', compact('file', 'content'));
+    }
+
+    public function accounts(Request $request)
+    {
+        $query = LedgerAccount::query();
+
+        if ($request->filled('file_id')) {
+            $query->where('ledger_file_id', $request->file_id);
+        }
+        if ($request->filled('report_date')) {
+            $query->whereDate('report_date', $request->report_date);
+        }
+        if ($request->filled('section')) {
+            $query->where('section', $request->section);
+        }
+        if ($request->filled('currency')) {
+            $query->where('currency', $request->currency);
+        }
+        if ($request->filled('account_code')) {
+            $query->where('account_code', 'like', '%' . $request->account_code . '%');
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('report_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('report_date', '<=', $request->date_to);
+        }
+
+        $accounts = $query->orderByDesc('report_date')->paginate(50);
+        $files = LedgerFile::orderBy('report_date', 'desc')->get();
+
+        return view('admin.accounts', compact('accounts', 'files'));
     }
 
     private function extractDateFromFile(string $path): ?string
@@ -94,11 +126,11 @@ class LedgerAdminController extends Controller
         $assets = 0;
         $liabilities = 0;
 
-        if (preg_match('/"0010\s+ASSETS.*?([-]?\d{1,3}(?:,\d{3})*?\.\d{3})"/', $content, $m)) {
-            $assets = (float) str_replace(',', '', $m[1] ?? 0);
+        if (preg_match('/"5680\s+TOTAL ASSETS\s+([-]?\d{1,3}(?:,\d{3})*?\.\d{3})"/', $content, $m)) {
+            $assets = (float) str_replace(',', '', $m[1]);
         }
-        if (preg_match('/"5685\s+LIABILITIES.*?([-]?\d{1,3}(?:,\d{3})*?\.\d{3})"/', $content, $m)) {
-            $liabilities = (float) str_replace(',', '', $m[1] ?? 0);
+        if (preg_match('/"7295\s+TOTAL LIABILITIES\s+([-]?\d{1,3}(?:,\d{3})*?\.\d{3})"/', $content, $m)) {
+            $liabilities = (float) str_replace(',', '', $m[1]);
         }
 
         return ['assets' => $assets, 'liabilities' => $liabilities];
@@ -140,7 +172,7 @@ class LedgerAdminController extends Controller
         return $parts[3] ?? 'LYD';
     }
 
-    private function parseAndReconcile(string $path, ?string $reportDate): array
+    private function parseAndReconcile(string $path, ?string $reportDate, LedgerFile $ledgerFile): array
     {
         $content = file_get_contents($path);
         $content = preg_replace('/\x00.*$/', '', $content);
@@ -166,6 +198,7 @@ class LedgerAdminController extends Controller
 
             foreach ($assets as $account => $balance) {
                 $records[] = [
+                    'ledger_file_id' => $ledgerFile->id,
                     'account_code' => $account,
                     'account_name' => null,
                     'section' => 'assets',
@@ -179,6 +212,7 @@ class LedgerAdminController extends Controller
 
             foreach ($liabilities as $account => $balance) {
                 $records[] = [
+                    'ledger_file_id' => $ledgerFile->id,
                     'account_code' => $account,
                     'account_name' => null,
                     'section' => 'liabilities',
