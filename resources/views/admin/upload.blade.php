@@ -92,11 +92,12 @@
                 <h3>أبرز الحسابات الإيجابية - Positive Asset Accounts (Top 10)</h3>
                 <table>
                     <thead>
-                        <tr><th>الحساب - Account</th><th>الرصيد - Balance</th></tr>
+                        <tr><th>الحساب - Account Code</th><th>العمله - Currency</th><th>الرصيد - Balance</th></tr>
                     </thead>
                     <tbody>
                         @foreach(collect($positiveAssets)->sortByDesc(fn($b) => $b)->take(10) as $account => $balance)
-                            <tr><td>{{ $account }}</td><td class="positive">{{ number_format($balance, 3) }}</td></tr>
+                            @php $parts = explode('.', $account); @endphp
+                            <tr><td>{{ $parts[1] ?? $account }}</td><td>{{ $parts[3] ?? '' }}</td><td class="positive">{{ number_format($balance, 3) }}</td></tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -116,11 +117,12 @@
                 <h3>أبرز الحسابات السالبة - Top Negative Liability Accounts (Top 5)</h3>
                 <table>
                     <thead>
-                        <tr><th>الحساب - Account</th><th>الرصيد - Balance</th></tr>
+                        <tr><th>الحساب - Account Code</th><th>العمله - Currency</th><th>الرصيد - Balance</th></tr>
                     </thead>
                     <tbody>
-                        @foreach(collect($negativeLiabilities)->sortBy()->take(5) as $account => $balance)
-                            <tr><td>{{ $account }}</td><td class="negative">{{ number_format($balance, 3) }}</td></tr>
+                        @foreach(collect($negativeLiabilities)->sortBy(fn($b) => $b)->take(5) as $account => $balance)
+                            @php $parts = explode('.', $account); @endphp
+                            <tr><td>{{ $parts[1] ?? $account }}</td><td>{{ $parts[3] ?? '' }}</td><td class="negative">{{ number_format($balance, 3) }}</td></tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -129,11 +131,12 @@
             <h3>أكبر حسابات الأصول - Top Asset Accounts (15)</h3>
             <table>
                 <thead>
-                    <tr><th>الحساب - Account</th><th>الرصيد - Balance</th></tr>
+                    <tr><th>الحساب - Account Code</th><th>العمله - Currency</th><th>الرصيد - Balance</th></tr>
                 </thead>
                 <tbody>
                     @foreach(collect($assets ?? [])->sortByDesc(fn($b) => abs($b))->take(15) as $account => $balance)
-                        <tr><td>{{ $account }}</td><td class="{{ $balance >= 0 ? 'positive' : 'negative' }}">{{ number_format($balance, 3) }}</td></tr>
+                        @php $parts = explode('.', $account); @endphp
+                        <tr><td>{{ $parts[1] ?? $account }}</td><td>{{ $parts[3] ?? '' }}</td><td class="{{ $balance >= 0 ? 'positive' : 'negative' }}">{{ number_format($balance, 3) }}</td></tr>
                     @endforeach
                 </tbody>
             </table>
@@ -141,11 +144,12 @@
             <h3>أكبر حسابات الخصوم - Top Liability Accounts (15)</h3>
             <table>
                 <thead>
-                    <tr><th>الحساب - Account</th><th>الرصيد - Balance</th></tr>
+                    <tr><th>الحساب - Account Code</th><th>العمله - Currency</th><th>الرصيد - Balance</th></tr>
                 </thead>
                 <tbody>
                     @foreach(collect($liabilities ?? [])->sortByDesc(fn($b) => abs($b))->take(15) as $account => $balance)
-                        <tr><td>{{ $account }}</td><td class="{{ $balance >= 0 ? 'positive' : 'negative' }}">{{ number_format($balance, 3) }}</td></tr>
+                        @php $parts = explode('.', $account); @endphp
+                        <tr><td>{{ $parts[1] ?? $account }}</td><td>{{ $parts[3] ?? '' }}</td><td class="{{ $balance >= 0 ? 'positive' : 'negative' }}">{{ number_format($balance, 3) }}</td></tr>
                     @endforeach
                 </tbody>
             </table>
