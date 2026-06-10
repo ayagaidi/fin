@@ -11,7 +11,12 @@ class LedgerReconcileController extends Controller
     {
         if ($request->isMethod('post')) {
             $request->validate([
-                'file' => 'required|file|mimes:csv,txt'
+                'file' => ['required', 'file', function ($attr, $file, $fail) {
+                    $ext = strtolower($file->getClientOriginalExtension());
+                    if (!in_array($ext, ['csv', 'txt'])) {
+                        $fail("The file field must be a file of type: csv, txt.");
+                    }
+                }]
             ]);
             
             $path = $request->file('file')->getRealPath();

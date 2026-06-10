@@ -38,6 +38,12 @@ return [
             'report' => false,
         ],
 
+        'ledger' => [
+            'driver' => 'local',
+            'root' => storage_path('app/ledger_files'),
+            'visibility' => 'public',
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

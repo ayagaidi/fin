@@ -65,7 +65,7 @@
                     <tr><th>الحساب - Account</th><th>الرصيد - Balance</th></tr>
                 </thead>
                 <tbody>
-                    @foreach(collect($positiveAssets)->sortByDesc()->take(10) as $account => $balance)
+                    @foreach(collect($positiveAssets)->sortByDesc(fn($b) => $b)->take(10) as $account => $balance)
                         <tr><td>{{ $account }}</td><td class="positive">{{ number_format($balance, 3) }}</td></tr>
                     @endforeach
                 </tbody>
